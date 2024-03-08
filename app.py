@@ -14,6 +14,21 @@ import streamlit as st
 from PyPDF2 import PdfReader #helps to read all the document
 import os
 from dotenv import load_dotenv
+import subprocess
+
+
+def install_requirements(requirements_file):
+    try:
+        # Construct the pip install command
+        pip_install_cmd = ['pip', 'install', '-r', requirements_file]
+        
+        # Run the pip install command
+        subprocess.run(pip_install_cmd, check=True)
+        
+        print("Dependencies installed successfully.")
+    except subprocess.CalledProcessError as e:
+        print("Error installing dependencies:", e)
+        # You can handle the error as needed here
 
 
 #Main Code
@@ -151,4 +166,10 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    requirements_file = "requirements.txt"
+
+    # Install requirements
+    install_requirements(requirements_file)
+
 

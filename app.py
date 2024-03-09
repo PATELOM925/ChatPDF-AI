@@ -166,9 +166,7 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    requirements_file = "requirements.txt"
-
+    requirements_file = "requirement.txt"
     # Install requirements
     install_requirements(requirements_file)
 

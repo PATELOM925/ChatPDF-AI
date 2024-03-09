@@ -48,10 +48,6 @@ Thank you for your understanding.
 
 Contributions are welcome! Please feel free to fork the repository and submit pull requests with your enhancements or bug fixes.
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## Acknowledgements
 
 Special thanks to the developers of Streamlit, LangChain, PyPDF2, FAISS, and Google Generative AI 

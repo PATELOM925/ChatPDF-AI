@@ -10,7 +10,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
 #importing our env  
-import streamlit as st
+import streamlit as st 
 from PyPDF2 import PdfReader #helps to read all the document
 import os
 from dotenv import load_dotenv

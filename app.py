@@ -18,30 +18,23 @@ import subprocess
 
 
 def install_requirements(requirements_file):
-    try:
-        # Construct the pip install command
-        pip_install_cmd = ['pip', 'install', '-r', requirements_file]
-        
-        # Run the pip install command
-        subprocess.run(pip_install_cmd, check=True)
-        
+    try: # Construct the pip install command
+        pip_install_cmd = ['pip', 'install', '-r', requirements_file] # Run the pip install command
+        subprocess.run(pip_install_cmd, check=True)     
         print("Dependencies installed successfully.")
     except subprocess.CalledProcessError as e:
-        print("Error installing dependencies:", e)
-        # You can handle the error as needed here
+        print("Error installing dependencies:", e) # You can handle the error as needed here
 
 
 #Main Code
 load_dotenv()
-#configure API Key
-ai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
+ai.configure(api_key=os.getenv('GOOGLE_API_KEY')) #configure API Key
 
 #new addition (save vector and load vector store)
 def save_vector_store(tokens, index_directory='faissindex'):
     embeddings = GoogleGenerativeAIEmbeddings(
         model='models/embedding-001',
-        google_api_key=os.getenv('GOOGLE_API_KEY')
-    )
+        google_api_key=os.getenv('GOOGLE_API_KEY'))
     os.makedirs(index_directory, exist_ok=True)
     vector_store = FAISS.from_texts(tokens, embedding=embeddings)
     vector_store.save_local(os.path.join(index_directory, 'index.faiss'))
@@ -49,12 +42,10 @@ def save_vector_store(tokens, index_directory='faissindex'):
 
 def load_vector_store(index_directory='faissindex'):
     embeddings = GoogleGenerativeAIEmbeddings(model='models/embedding-001')
-    try:
-        # Load the FAISS index and associated metadata
+    try:  # Load the FAISS index and associated metadata
         vector_store = FAISS.load_local(
             os.path.join(index_directory, 'index.faiss'),
-            embeddings
-        )
+            embeddings )
         return vector_store
     except FileNotFoundError:
         print(f"Error: FAISS index not found in {index_directory}.")
@@ -82,29 +73,10 @@ def get_text_chunks(text):
 #converting tokens/chunks to vectors
 def get_vector_store(tokens):
     embeddings = GoogleGenerativeAIEmbeddings(model='models/embedding-001', google_api_key="AIzaSyB4QNli0UOBec0r0LX9pg1Vb7XnY_xDKNI")
-    # Ensure the directory exists
-    index_directory = 'faissindex'
+    index_directory = 'faissindex'     # Ensure the directory exists
     os.makedirs(index_directory,exist_ok=True)
-    
-    # Save the vector store
-    vector_store = FAISS.from_texts(tokens, embedding=embeddings)
+    vector_store = FAISS.from_texts(tokens, embedding=embeddings)     # Save the vector store
     vector_store.save_local(os.path.join(index_directory, 'index.faiss'))
-
-# def give_prompt():
-#     prompt_template = '''
-#     Believe you are true expert in whatever question asked, and answer the question as detailed as possible in the provided context only,
-#     make sure to check the whole document correctly before answering all the details,
-#     if the answer is not available in the context just say "Answer Not Available", Don't provide the wrong answer
-#     Context: \n{context}?\n
-#     Question: \n{question}\n
-    
-#     Answer: 
-#     '''
-#     model = ChatGoogleGenerativeAI(model='gemini-pro',temperature=0.2,max_output_tokens=1000,verbose=True)
-#     prompt = PromptTemplate(template=prompt_template, input_variables=['context', 'question'])
-#     #chain_type = 'stuff' helps to text summarization
-#     chain = load_qa_chain(model,chain_type = 'stuff',prompt = prompt , verbose=True)
-#     return chain
 
 def give_prompt():
     prompt_template = '''
@@ -113,7 +85,6 @@ def give_prompt():
     if the answer is not available in the context just say "Answer Not Available", Don't provide the wrong answer
     Context: \n{context}?\n
     Question: \n{question}\n
-    
     Answer: 
     '''
     
@@ -128,118 +99,36 @@ def give_prompt():
 def input(question):
     embeddings = GoogleGenerativeAIEmbeddings(model='models/embedding-001')
     new_db = None
-    # Check if the file exists before trying to load the Faiss index
     index_path = 'faissindex/index.faiss'
     if os.path.exists(index_path):
         new_db = FAISS.load_local(index_path, embeddings, allow_dangerous_deserialization=True)
     else:
         print(f"Error: The file {index_path} does not exist or is not a valid Faiss index directory.")
 
-    # Check if new_db is not None before using it
     if new_db is not None:
         doc = new_db.similarity_search(question)
-        chain = give_prompt()
-        response = chain(
-            { "input_documents": doc, "question": question },
-            return_only_outputs=True)
+        if doc is None or len(doc) == 0:
+        st.warning("No relevant documents found.")
+        return
 
+        chain = give_prompt()  # Get the chain
+        if chain is None:
+            st.error("Failed to initialize the prompt chain.")
+            return  # Exit early if chain is not valid
+
+        response = chain( { "input_documents": doc, "question": question },  return_only_outputs=True )
         print(response)
-        st.write("Reply: ", response["output_text"])
+        st.write("Reply: ", response.get("output_text", "Error generating response."))
     else:
         st.error('Please build the database first.')
-
-    
 
 def page_configure():
     st.set_page_config(
         page_title="ChatPDF AI",
         page_icon="📝",
         layout="centered",
-        initial_sidebar_state="expanded",
-    )
+        initial_sidebar_state="expanded",)
     st.title("Chat With Your PDF")
-     
-
-
-# def main():
-#     page_configure()
-#     # Inject JavaScript using st.markdown
-#     st.markdown("""
-#         <script>
-#             // Your JavaScript code here
-#             axios.get('your_api_endpoint', { timeout: 15000 })
-#                 .then(response => {
-#                     // handle the response
-#                     console.log(response);
-#                 })
-#                 .catch(error => {
-#                     // handle the error
-#                     console.error(error);
-#                 });
-#         </script>
-#     """, unsafe_allow_html=True)  
-    
-    # Sidebar v1
-    # st.sidebar.title("ChatPDF AI")
-    # st.sidebar.write("Upload PDF Documents:")
-    # uploaded_files = st.sidebar.file_uploader(" ", type=["pdf"], accept_multiple_files=True)
-    # question = st.sidebar.text_input("Enter your question:")
-
-    # if st.sidebar.button("Get Answer"):
-    #     if not uploaded_files:
-    #         st.sidebar.warning("Please upload at least one PDF document.")
-    #     elif not question:
-    #         st.sidebar.warning("Please enter a question.")
-    #     else:
-    #         with st.spinner("Fetching Answer..."):
-    #             # Read PDFs and extract text
-    #             pdf_texts = [get_pdf_text([pdf]) for pdf in uploaded_files]
-    #             # Combine text from multiple PDFs
-    #             combined_text = ' '.join(pdf_texts)
-    #             # Split text into chunks
-    #             text_chunks = get_text_chunks(combined_text)
-
-    #             # Create and save vector store
-    #             get_vector_store(text_chunks)
-
-    #             # Get the answer using the LangChain pipeline
-    #             input(question)
-    #             st.success("Answer retrieved successfully!")
-
-    # Sidebar v2    
-    # st.sidebar.title("ChatPDF AI")
-    # uploaded_files = st.sidebar.file_uploader("Upload PDF(s):", type=["pdf"], accept_multiple_files=True)
-    # question = st.sidebar.text_input("Enter your question:")
-    
-    # if st.sidebar.button("Process PDF"):
-    #     if not uploaded_files:
-    #         st.sidebar.warning("Please upload at least one PDF document.")
-    #     else:
-    #         with st.spinner("Processing PDFs..."):
-    #             pdf_text = get_pdf_text(uploaded_files)
-    #             tokens = get_text_chunks(pdf_text)
-    #             save_vector_store(tokens)
-    #             st.success("Done!!, Now throw a question!")
-
-    # if st.sidebar.button("Ask Question"):
-    #     if not question:
-    #         st.sidebar.warning("Please enter a question.")
-    #     else:
-    #         vector_store = load_vector_store()
-    #         if vector_store:
-    #             with st.spinner("Searching..."):
-    #                 try:
-    #                     docs = vector_store.similarity_search(question)
-    #                     if docs:
-    #                         chain = give_prompt()
-    #                         response = chain({"input_documents": docs, "question": question}, return_only_outputs=True)
-    #                         st.write("Reply:", response.get("output_text", "Error generating response."))
-    #                     else:
-    #                         st.warning("No relevant information found.")
-    #                 except Exception as e:
-    #                     st.error(f"Error processing your query: {e}")
-    #         else:
-    #             st.warning("Please process PDFs first.")
 
 def main():
     page_configure()
@@ -297,5 +186,3 @@ if __name__ == "__main__":
     requirements_file = "requirements.txt"
     # Install requirements
     install_requirements(requirements_file)
-
-

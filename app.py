@@ -207,24 +207,24 @@ def main():
                 st.success("Done!!, Now throw a question!")
 
     if st.sidebar.button("Ask Question"):
-    if not question:
-        st.sidebar.warning("Please enter a question.")
-    else:
-        vector_store = load_vector_store()
-        if vector_store:
-            with st.spinner("Searching..."):
-                try:
-                    docs = vector_store.similarity_search(question)
-                    if docs:
-                        chain = give_prompt()
-                        response = chain({"input_documents": docs, "question": question}, return_only_outputs=True)
-                        st.write("Reply:", response.get("output_text", "Error generating response."))
-                    else:
-                        st.warning("No relevant information found.")
-                except Exception as e:
-                    st.error(f"Error processing your query: {e}")
+        if not question:
+            st.sidebar.warning("Please enter a question.")
         else:
-            st.warning("Please process PDFs first.")
+            vector_store = load_vector_store()
+            if vector_store:
+                with st.spinner("Searching..."):
+                    try:
+                        docs = vector_store.similarity_search(question)
+                        if docs:
+                            chain = give_prompt()
+                            response = chain({"input_documents": docs, "question": question}, return_only_outputs=True)
+                            st.write("Reply:", response.get("output_text", "Error generating response."))
+                        else:
+                            st.warning("No relevant information found.")
+                    except Exception as e:
+                        st.error(f"Error processing your query: {e}")
+            else:
+                st.warning("Please process PDFs first.")
 
 
 

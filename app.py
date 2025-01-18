@@ -90,6 +90,22 @@ def get_vector_store(tokens):
     vector_store = FAISS.from_texts(tokens, embedding=embeddings)
     vector_store.save_local(os.path.join(index_directory, 'index.faiss'))
 
+# def give_prompt():
+#     prompt_template = '''
+#     Believe you are true expert in whatever question asked, and answer the question as detailed as possible in the provided context only,
+#     make sure to check the whole document correctly before answering all the details,
+#     if the answer is not available in the context just say "Answer Not Available", Don't provide the wrong answer
+#     Context: \n{context}?\n
+#     Question: \n{question}\n
+    
+#     Answer: 
+#     '''
+#     model = ChatGoogleGenerativeAI(model='gemini-pro',temperature=0.2,max_output_tokens=1000,verbose=True)
+#     prompt = PromptTemplate(template=prompt_template, input_variables=['context', 'question'])
+#     #chain_type = 'stuff' helps to text summarization
+#     chain = load_qa_chain(model,chain_type = 'stuff',prompt = prompt , verbose=True)
+#     return chain
+
 def give_prompt():
     prompt_template = '''
     Believe you are true expert in whatever question asked, and answer the question as detailed as possible in the provided context only,
@@ -100,16 +116,18 @@ def give_prompt():
     
     Answer: 
     '''
-    model = ChatGoogleGenerativeAI(model='gemini-pro',temperature=0.2,max_output_tokens=1000,verbose=True)
-    prompt = PromptTemplate(template=prompt_template, input_variables=['context', 'question'])
-    #chain_type = 'stuff' helps to text summarization
-    chain = load_qa_chain(model,chain_type = 'stuff',prompt = prompt , verbose=True)
-    return chain
+    
+    try:
+        model = ChatGoogleGenerativeAI(model='gemini-pro', temperature=0.2, max_output_tokens=1000, verbose=True)
+        prompt = PromptTemplate(template=prompt_template, input_variables=['context', 'question'])
+        chain = load_qa_chain(model, chain_type='stuff', prompt=prompt, verbose=True)
+        return chain
+    except Exception as e:
+        print(f"Error initializing model or creating chain: {e}")
 
 def input(question):
     embeddings = GoogleGenerativeAIEmbeddings(model='models/embedding-001')
     new_db = None
-    
     # Check if the file exists before trying to load the Faiss index
     index_path = 'faissindex/index.faiss'
     if os.path.exists(index_path):
@@ -121,11 +139,8 @@ def input(question):
     if new_db is not None:
         doc = new_db.similarity_search(question)
         chain = give_prompt()
-
         response = chain(
-            {
-                "input_documents": doc, "question": question
-            },
+            { "input_documents": doc, "question": question },
             return_only_outputs=True)
 
         print(response)
@@ -191,7 +206,7 @@ def page_configure():
     #             input(question)
     #             st.success("Answer retrieved successfully!")
 
-    #Sidebar v2    
+    # Sidebar v2    
     # st.sidebar.title("ChatPDF AI")
     # uploaded_files = st.sidebar.file_uploader("Upload PDF(s):", type=["pdf"], accept_multiple_files=True)
     # question = st.sidebar.text_input("Enter your question:")
@@ -276,7 +291,6 @@ def main():
                         st.error(f"Error processing your query: {e}")
             else:
                 st.warning("Please process PDFs first.")
-
 
 if __name__ == "__main__":
     main()

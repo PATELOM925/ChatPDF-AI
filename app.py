@@ -10,6 +10,7 @@ from langchain_core.language_models import BaseLanguageModel
 import streamlit as st 
 from PyPDF2 import PdfReader 
 import os
+import subprocess
 from dotenv import load_dotenv
 
 def install_requirements(requirements_file):
@@ -77,6 +78,20 @@ def page_configure():
 
 def main():
     page_configure()
+    st.markdown("""
+            <script>
+                // Your JavaScript code here
+                axios.get('your_api_endpoint', { timeout: 20000 })
+                    .then(response => {
+                        // handle the response
+                        console.log(response);
+                    })
+                    .catch(error => {
+                        // handle the error
+                        console.error(error);
+                    });
+            </script>
+        """, unsafe_allow_html=True)  
     
     st.sidebar.title("ChatPDF AI")
     uploaded_files = st.sidebar.file_uploader("Upload PDF(s):", type=["pdf"], accept_multiple_files=True)

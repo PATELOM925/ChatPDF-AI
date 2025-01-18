@@ -30,31 +30,6 @@ def install_requirements(requirements_file):
 load_dotenv()
 ai.configure(api_key=os.getenv('GOOGLE_API_KEY')) #configure API Key
 
-#new addition (save vector and load vector store)
-def save_vector_store(tokens, index_directory='faissindex'):
-    embeddings = GoogleGenerativeAIEmbeddings(
-        model='models/embedding-001',
-        google_api_key=os.getenv('GOOGLE_API_KEY'))
-    os.makedirs(index_directory, exist_ok=True)
-    vector_store = FAISS.from_texts(tokens, embedding=embeddings)
-    vector_store.save_local(os.path.join(index_directory, 'index.faiss'))
-    return vector_store
-
-def load_vector_store(index_directory='faissindex'):
-    embeddings = GoogleGenerativeAIEmbeddings(model='models/embedding-001')
-    try:  # Load the FAISS index and associated metadata
-        vector_store = FAISS.load_local(
-            os.path.join(index_directory, 'index.faiss'),
-            embeddings )
-        return vector_store
-    except FileNotFoundError:
-        print(f"Error: FAISS index not found in {index_directory}.")
-        return None
-    except Exception as e:
-        print(f"Error loading FAISS vector store: {e}")
-        return None
-
-
 #Read the PDf ,Go through all pages, Extract the text
 def get_pdf_text(pdf_docs):
     text=''
@@ -135,7 +110,7 @@ def main():
     st.markdown("""
             <script>
                 // Your JavaScript code here
-                axios.get('your_api_endpoint', { timeout: 15000 })
+                axios.get('your_api_endpoint', { timeout: 20000 })
                     .then(response => {
                         // handle the response
                         console.log(response);
@@ -150,39 +125,23 @@ def main():
     st.sidebar.title("ChatPDF AI")
     uploaded_files = st.sidebar.file_uploader("Upload PDF(s):", type=["pdf"], accept_multiple_files=True)
     question = st.sidebar.text_input("Enter your question:")
-    
-    if st.sidebar.button("Process PDF"):
-        if not uploaded_files:
-            st.sidebar.warning("Please upload at least one PDF document.")
-        else:
-            with st.spinner("Processing PDFs..."):
-                pdf_text = get_pdf_text(uploaded_files)
-                tokens = get_text_chunks(pdf_text)
-                save_vector_store(tokens)
-                st.success("Done! Now you can ask a question.")
 
-    if st.sidebar.button("Ask Question"):
-        if not question:
-            st.sidebar.warning("Please enter a question.")
-        else:
-            vector_store = load_vector_store()
-            if vector_store:
-                with st.spinner("Searching..."):
-                    try:
-                        docs = vector_store.similarity_search(question)
-                        if docs:
-                            chain = give_prompt()
-                            response = chain({"input_documents": docs, "question": question}, return_only_outputs=True)
-                            st.write("Reply:", response.get("output_text", "Error generating response."))
-                        else:
-                            st.warning("No relevant information found.")
-                    except Exception as e:
-                        st.error(f"Error processing your query: {e}")
-            else:
-                st.warning("Please process PDFs first.")
+    if st.sidebar.button("Get Answer"):
+    if not uploaded_files:
+        st.sidebar.warning("Please upload at least one PDF document.")
+    elif not question:
+        st.sidebar.warning("Please enter a question.")
+    else:
+        with st.spinner("Fetching Answer..."):
+            pdf_texts = [get_pdf_text([pdf]) for pdf in uploaded_files]             # Read PDFs and extract text
+            combined_text = ' '.join(pdf_texts)            # Combine text from multiple PDFs
+            text_chunks = get_text_chunks(combined_text)            # Split text into chunks
+            get_vector_store(text_chunks)                             # Create and save vector store
+            input(question)                                    # Get the answer using the LangChain pipeline
+            st.success("Answer retrieved successfully!")
+
 
 if __name__ == "__main__":
     main()
     requirements_file = "requirements.txt"
-    # Install requirements
-    install_requirements(requirements_file)
+    install_requirements(requirements_file) # Install requirements

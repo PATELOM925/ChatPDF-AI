@@ -127,18 +127,18 @@ def main():
     question = st.sidebar.text_input("Enter your question:")
 
     if st.sidebar.button("Get Answer"):
-    if not uploaded_files:
-        st.sidebar.warning("Please upload at least one PDF document.")
-    elif not question:
-        st.sidebar.warning("Please enter a question.")
-    else:
-        with st.spinner("Fetching Answer..."):
-            pdf_texts = [get_pdf_text([pdf]) for pdf in uploaded_files]             # Read PDFs and extract text
-            combined_text = ' '.join(pdf_texts)            # Combine text from multiple PDFs
-            text_chunks = get_text_chunks(combined_text)            # Split text into chunks
-            get_vector_store(text_chunks)                             # Create and save vector store
-            input(question)                                    # Get the answer using the LangChain pipeline
-            st.success("Answer retrieved successfully!")
+        if not uploaded_files:
+            st.sidebar.warning("Please upload at least one PDF document.")
+        elif not question:
+            st.sidebar.warning("Please enter a question.")
+        else:
+            with st.spinner("Fetching Answer..."):
+                pdf_texts = [get_pdf_text([pdf]) for pdf in uploaded_files]             # Read PDFs and extract text
+                combined_text = ' '.join(pdf_texts)            # Combine text from multiple PDFs
+                text_chunks = get_text_chunks(combined_text)            # Split text into chunks
+                get_vector_store(text_chunks)                             # Create and save vector store
+                input(question)                                    # Get the answer using the LangChain pipeline
+                st.success("Answer retrieved successfully!")
 
 
 if __name__ == "__main__":

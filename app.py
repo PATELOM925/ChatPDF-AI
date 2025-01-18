@@ -101,7 +101,7 @@ def give_prompt():
     Answer: 
     '''
     model = ChatGoogleGenerativeAI(model='gemini-pro',temperature=0.2,max_output_tokens=1000,verbose=True)
-    prompt = PromptTemplate(template=prompt_template,input_variables=['Context','Question'])
+    prompt = PromptTemplate(template=prompt_template, input_variables=['context', 'question'])
     #chain_type = 'stuff' helps to text summarization
     chain = load_qa_chain(model,chain_type = 'stuff',prompt = prompt , verbose=True)
     return chain
@@ -146,23 +146,23 @@ def page_configure():
      
 
 
-def main():
-    page_configure()
-    # Inject JavaScript using st.markdown
-    st.markdown("""
-        <script>
-            // Your JavaScript code here
-            axios.get('your_api_endpoint', { timeout: 15000 })
-                .then(response => {
-                    // handle the response
-                    console.log(response);
-                })
-                .catch(error => {
-                    // handle the error
-                    console.error(error);
-                });
-        </script>
-    """, unsafe_allow_html=True)  
+# def main():
+#     page_configure()
+#     # Inject JavaScript using st.markdown
+#     st.markdown("""
+#         <script>
+#             // Your JavaScript code here
+#             axios.get('your_api_endpoint', { timeout: 15000 })
+#                 .then(response => {
+#                     // handle the response
+#                     console.log(response);
+#                 })
+#                 .catch(error => {
+#                     // handle the error
+#                     console.error(error);
+#                 });
+#         </script>
+#     """, unsafe_allow_html=True)  
     
     # Sidebar v1
     # st.sidebar.title("ChatPDF AI")
@@ -192,6 +192,57 @@ def main():
     #             st.success("Answer retrieved successfully!")
 
     #Sidebar v2    
+    # st.sidebar.title("ChatPDF AI")
+    # uploaded_files = st.sidebar.file_uploader("Upload PDF(s):", type=["pdf"], accept_multiple_files=True)
+    # question = st.sidebar.text_input("Enter your question:")
+    
+    # if st.sidebar.button("Process PDF"):
+    #     if not uploaded_files:
+    #         st.sidebar.warning("Please upload at least one PDF document.")
+    #     else:
+    #         with st.spinner("Processing PDFs..."):
+    #             pdf_text = get_pdf_text(uploaded_files)
+    #             tokens = get_text_chunks(pdf_text)
+    #             save_vector_store(tokens)
+    #             st.success("Done!!, Now throw a question!")
+
+    # if st.sidebar.button("Ask Question"):
+    #     if not question:
+    #         st.sidebar.warning("Please enter a question.")
+    #     else:
+    #         vector_store = load_vector_store()
+    #         if vector_store:
+    #             with st.spinner("Searching..."):
+    #                 try:
+    #                     docs = vector_store.similarity_search(question)
+    #                     if docs:
+    #                         chain = give_prompt()
+    #                         response = chain({"input_documents": docs, "question": question}, return_only_outputs=True)
+    #                         st.write("Reply:", response.get("output_text", "Error generating response."))
+    #                     else:
+    #                         st.warning("No relevant information found.")
+    #                 except Exception as e:
+    #                     st.error(f"Error processing your query: {e}")
+    #         else:
+    #             st.warning("Please process PDFs first.")
+
+def main():
+    page_configure()
+    st.markdown("""
+            <script>
+                // Your JavaScript code here
+                axios.get('your_api_endpoint', { timeout: 15000 })
+                    .then(response => {
+                        // handle the response
+                        console.log(response);
+                    })
+                    .catch(error => {
+                        // handle the error
+                        console.error(error);
+                    });
+            </script>
+        """, unsafe_allow_html=True)  
+    
     st.sidebar.title("ChatPDF AI")
     uploaded_files = st.sidebar.file_uploader("Upload PDF(s):", type=["pdf"], accept_multiple_files=True)
     question = st.sidebar.text_input("Enter your question:")
@@ -204,7 +255,7 @@ def main():
                 pdf_text = get_pdf_text(uploaded_files)
                 tokens = get_text_chunks(pdf_text)
                 save_vector_store(tokens)
-                st.success("Done!!, Now throw a question!")
+                st.success("Done! Now you can ask a question.")
 
     if st.sidebar.button("Ask Question"):
         if not question:
@@ -225,7 +276,6 @@ def main():
                         st.error(f"Error processing your query: {e}")
             else:
                 st.warning("Please process PDFs first.")
-
 
 
 if __name__ == "__main__":

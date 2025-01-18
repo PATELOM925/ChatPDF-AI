@@ -2,7 +2,7 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 #embedding technique / converting pdf to vectors
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from google import generativeai as ai
+from google import generativeai as ai 
 #vector embeddings
 from langchain_community.vectorstores import FAISS
 from langchain_google_genai import ChatGoogleGenerativeAI  

@@ -36,6 +36,26 @@ load_dotenv()
 #configure API Key
 ai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
 
+#new addition (save vector and load vector store)
+def save_vector_store(tokens, index_directory='faissindex'):
+    embeddings = GoogleGenerativeAIEmbeddings(
+        model='models/embedding-001',
+        google_api_key=os.getenv('GOOGLE_API_KEY')
+    )
+    os.makedirs(index_directory, exist_ok=True)
+    vector_store = FAISS.from_texts(tokens, embedding=embeddings)
+    vector_store.save_local(os.path.join(index_directory, 'index.faiss'))
+    return vector_store
+
+def load_vector_store(index_directory='faissindex'):
+    embeddings = GoogleGenerativeAIEmbeddings(model='models/embedding-001')
+    try:
+        vector_store = FAISS.load_local(
+            os.path.join(index_directory, 'index.faiss'), embeddings, allow_dangerous_deserialization=True
+        )
+        return vector_store
+    except FileNotFoundError:
+        return None
 
 #Read the PDf ,Go through all pages, Extract the text
 def get_pdf_text(pdf_docs):
@@ -137,32 +157,65 @@ def main():
         </script>
     """, unsafe_allow_html=True)  
     
-    # Sidebar
-    st.sidebar.title("ChatPDF AI")
-    st.sidebar.write("Upload PDF Documents:")
-    uploaded_files = st.sidebar.file_uploader(" ", type=["pdf"], accept_multiple_files=True)
-    question = st.sidebar.text_input("Enter your question:")
+    # Sidebar v1
+    # st.sidebar.title("ChatPDF AI")
+    # st.sidebar.write("Upload PDF Documents:")
+    # uploaded_files = st.sidebar.file_uploader(" ", type=["pdf"], accept_multiple_files=True)
+    # question = st.sidebar.text_input("Enter your question:")
 
-    if st.sidebar.button("Get Answer"):
+    # if st.sidebar.button("Get Answer"):
+    #     if not uploaded_files:
+    #         st.sidebar.warning("Please upload at least one PDF document.")
+    #     elif not question:
+    #         st.sidebar.warning("Please enter a question.")
+    #     else:
+    #         with st.spinner("Fetching Answer..."):
+    #             # Read PDFs and extract text
+    #             pdf_texts = [get_pdf_text([pdf]) for pdf in uploaded_files]
+    #             # Combine text from multiple PDFs
+    #             combined_text = ' '.join(pdf_texts)
+    #             # Split text into chunks
+    #             text_chunks = get_text_chunks(combined_text)
+
+    #             # Create and save vector store
+    #             get_vector_store(text_chunks)
+
+    #             # Get the answer using the LangChain pipeline
+    #             input(question)
+    #             st.success("Answer retrieved successfully!")
+
+    #Sidebar v2    
+    st.sidebar.title("ChatPDF AI")
+    uploaded_files = st.sidebar.file_uploader("Upload PDF(s):", type=["pdf"], accept_multiple_files=True)
+    question = st.sidebar.text_input("Enter your question:")
+    
+    if st.sidebar.button("Process PDF"):
         if not uploaded_files:
             st.sidebar.warning("Please upload at least one PDF document.")
-        elif not question:
+        else:
+            with st.spinner("Processing PDFs..."):
+                pdf_text = get_pdf_text(uploaded_files)
+                tokens = get_text_chunks(pdf_text)
+                save_vector_store(tokens)
+                st.success("Vector store created successfully!")
+
+    if st.sidebar.button("Ask Question"):
+        if not question:
             st.sidebar.warning("Please enter a question.")
         else:
-            with st.spinner("Fetching Answer..."):
-                # Read PDFs and extract text
-                pdf_texts = [get_pdf_text([pdf]) for pdf in uploaded_files]
-                # Combine text from multiple PDFs
-                combined_text = ' '.join(pdf_texts)
-                # Split text into chunks
-                text_chunks = get_text_chunks(combined_text)
+            vector_store = load_vector_store()
+            if vector_store:
+                with st.spinner("Searching..."):
+                    docs = vector_store.similarity_search(question)
+                    if docs:
+                        chain = give_prompt()
+                        response = chain({"input_documents": docs, "question": question}, return_only_outputs=True)
+                        st.write("Reply:", response.get("output_text", "Error generating response."))
+                    else:
+                        st.warning("No relevant information found.")
+            else:
+                st.warning("Please process PDFs first.")
 
-                # Create and save vector store
-                get_vector_store(text_chunks)
-
-                # Get the answer using the LangChain pipeline
-                input(question)
-                st.success("Answer retrieved successfully!")
 
 if __name__ == "__main__":
     main()

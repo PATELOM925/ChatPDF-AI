@@ -108,8 +108,8 @@ def input(question):
     if new_db is not None:
         doc = new_db.similarity_search(question)
         if doc is None or len(doc) == 0:
-        st.warning("No relevant documents found.")
-        return
+            st.warning("No relevant documents found.")
+            return
 
         chain = give_prompt()  # Get the chain
         if chain is None:

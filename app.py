@@ -57,7 +57,7 @@ def give_prompt():
     Answer: 
     '''
     
-    model = ChatGoogleGenerativeAI(model='gemini-pro', temperature=0.2, max_output_tokens=1000, verbose=True)
+    model = ChatGoogleGenerativeAI(model='gemini-1.5-pro', temperature=0.2, max_tokens=1000)
     
     # Ensure that ChatGoogleGenerativeAI is compatible with LangChain's requirements.
     if not isinstance(model, BaseLanguageModel):

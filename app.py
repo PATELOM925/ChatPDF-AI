@@ -6,7 +6,7 @@ from google import generativeai as ai
 #vector embeddings
 from langchain_community.vectorstores import FAISS
 from langchain_google_genai import ChatGoogleGenerativeAI  
-#for chatting and defining prompts
+#for chatting and defining prompts 
 from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
 #importing our env  

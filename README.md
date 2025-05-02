@@ -1,10 +1,10 @@
 # ChatPDF AI
 
 ChatPDF AI is a Python-based web application built with Streamlit and LangChain that leverages natural language processing (NLP) techniques to extract insights from PDF documents through conversational interactions. 
-
+ 
 ## Features
 
-- **Document Loading**: Extract text content from PDF documents with ease.
+- **Document Loading**: Extract text content from PDF documents easily.
 - **Document Splitting**: Efficiently split large text content into smaller chunks for processing.
 - **Vector Stores and Embeddings**: Convert text chunks into vector representations for advanced retrieval and similarity search. 
 - **Retrieval**: Rapidly access relevant document sections beyond semantic queries.
@@ -30,9 +30,8 @@ streamlit run app.py
 3. Click the "Get Answer" button to retrieve answers based on the uploaded documents and your queries.
 
 ## Side Note
-
-Please note that this app is deployed using my personal API key. 
-If you encounter any request errors, please be patient as it may be due to API rate limits. 
+This app is deployed using my personal API key. 
+If you encounter any request errors, please be patient, as it may be due to API rate limits. 
 Thank you for your understanding.
 
 ## Technologies Used

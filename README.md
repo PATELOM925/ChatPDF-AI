@@ -32,7 +32,7 @@ streamlit run app.py
 ## Side Note
 This app is deployed using my personal API key. 
 If you encounter any request errors, please be patient, as it may be due to API rate limits. 
-Thank you for your understanding.
+I appreciate your understanding.
 
 ## Technologies Used
 

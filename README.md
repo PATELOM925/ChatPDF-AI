@@ -51,3 +51,6 @@ Contributions are welcome! Please feel free to fork the repository and submit pu
 
 Special thanks to the developers of Streamlit, LangChain, PyPDF2, FAISS, and Google Generative AI 
 for their fantastic libraries and tools that made this project possible.
+
+## CONTACT
+OM M. PATEL → [PATELOM925](https://github.com/PATELOM925)

@@ -1,3 +1,4 @@
+#Old Requirements.txt file
 streamlit
 google-generativeai
 python_dotenv

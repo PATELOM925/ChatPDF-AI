@@ -9,7 +9,7 @@ from langchain.prompts import PromptTemplate
 from langchain_core.language_models import BaseLanguageModel
 import streamlit as st.  
 from PyPDF2 import PdfReader 
-import os
+import os  
 import subprocess
 from dotenv import load_dotenv
 
